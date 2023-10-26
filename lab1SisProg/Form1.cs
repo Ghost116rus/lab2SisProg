@@ -41,38 +41,38 @@ namespace lab1SisProg
                     operationCodeArray[i, j] = Convert.ToString(operationCodeDataGrid.Rows[i].Cells[j].Value).ToUpper();
 
             //помещаем исходный код в динамический массив
-            string[] str = sourceCodeTextBox.Text.Split('\n');
+            string[] strArr = sourceCodeTextBox.Text.Split('\n');
 
-            for (int i = 0; i < str.Length; i++)
-                str[i] = Convert.ToString(str[i]).Replace("\r", "");
+            for (int i = 0; i < strArr.Length; i++)
+                strArr[i] = Convert.ToString(strArr[i]).Replace("\r", "");
 
-            str = str.Where(x => !string.IsNullOrEmpty(x)).ToArray();
+            strArr = strArr.Where(x => !string.IsNullOrEmpty(x)).ToArray();
             
-            string[,] sourceCodeArray = new string[str.Length, columnsCount];
+            string[,] sourceCodeArray = new string[strArr.Length, columnsCount];
 
-            for (int i = 0; i < str.Length; i++)
+            for (int i = 0; i < strArr.Length; i++)
                 for (int j = 0; j < columnsCount; j++)
                     sourceCodeArray[i, j] = "";
 
-            for (int i = 0; i < str.Length; i++)
+            for (int i = 0; i < strArr.Length; i++)
             {
-                str[i] = str[i].Trim();
-                string[] temp = str[i].Split(' ');
+                strArr[i] = strArr[i].Trim();
+                string[] temp = strArr[i].Split(' ');
                 if (temp.Length >= 3)
                 {
-                    if (temp[2].IndexOf('"') == 1 && temp[temp.Length - 1].LastIndexOf('"') == temp[temp.Length - 1].Length - 1)
-                    {
-                        for (int j = 3; j < temp.Length; j++)
-                        {
-                            temp[2] += " " + temp[j];
-                            temp[j] = "";
-                        }
-                    }
-                    else if (temp[1].IndexOf('"') == 1 && (temp[temp.Length - 1].LastIndexOf('"') == temp[temp.Length - 1].Length - 1))
+                    if (temp[1].IndexOf('"') == 1 && (temp[temp.Length - 1].LastIndexOf('"') == temp[temp.Length - 1].Length - 1))
                     {
                         for (int j = 2; j < temp.Length; j++)
                         {
                             temp[1] += " " + temp[j];
+                            temp[j] = "";
+                        }
+                    }
+                    else if (temp[2].IndexOf('"') == 1 && temp[temp.Length - 1].LastIndexOf('"') == temp[temp.Length - 1].Length - 1)
+                    {
+                        for (int j = 3; j < temp.Length; j++)
+                        {
+                            temp[2] += " " + temp[j];
                             temp[j] = "";
                         }
                     }
@@ -96,12 +96,12 @@ namespace lab1SisProg
                     {
                         if (dC.CheckDirective(temp[0]) || fsp.FindCode(temp[0], operationCodeArray) != -1)
                         {
-                            if (fsp.FindCode(temp[0], operationCodeArray) != -1 && typeAdr == 0 && (temp[1].Contains('[') || temp[1].Contains(']')))
+                            if (typeAdr == 0 && fsp.FindCode(temp[0], operationCodeArray) != -1 && (temp[1].Contains('[') || temp[1].Contains(']')))
                             {
                                 MessageBox.Show($"Относительная адресация в {i + 1} строке. Выбрана прямая адресация.", "Внимание!");
                                 return;
                             }
-                            if(fsp.FindCode(temp[0], operationCodeArray) != -1 && typeAdr == 1 && (!temp[1].Contains('[') || !temp[1].Contains(']')) && !int.TryParse(temp[1], out int p))
+                            if(typeAdr == 1 && fsp.FindCode(temp[0], operationCodeArray) != -1 && (!temp[1].Contains('[') || !temp[1].Contains(']')) && !int.TryParse(temp[1], out int p))
                             {
                                 MessageBox.Show($"Прямая адресация в {i + 1} строке. Выбрана относительная адресация.", "Внимание!");
                                 return;
@@ -124,7 +124,7 @@ namespace lab1SisProg
                     {
                         if (dC.CheckDirective(temp[0]) || fsp.FindCode(temp[0], operationCodeArray) != -1)
                         {
-                            if (temp[2].IndexOf('"') == 1 && temp[3].IndexOf('"') == temp[3].Length - 1)
+                            if (temp[2].IndexOf('"') == 1 && temp[2].IndexOf('"') == temp[2].Length - 1)
                             {
                                 sourceCodeArray[i, 1] = temp[0];
                                 sourceCodeArray[i, 2] = temp[1] + " " + temp[2];
@@ -211,7 +211,7 @@ namespace lab1SisProg
             for (int i = 0; i < sourceCodeArray.GetLength(0); i++)
                 sourceCodeArray[i, 1] = Convert.ToString(sourceCodeArray[i, 1]).ToUpper();
 
-            for (int i = 0; i < str.Length; i++)
+            for (int i = 0; i < strArr.Length; i++)
             {
                 for (int j = 0; j < columnsCount; j++)
                     Console.Write(sourceCodeArray[i, j]);
@@ -307,7 +307,7 @@ namespace lab1SisProg
             operationCodeDataGrid.Rows.Add("LOADR2", "03", "4");
             operationCodeDataGrid.Rows.Add("ADD", "04", "2");
             operationCodeDataGrid.Rows.Add("SAVER1", "05", "4");
-            operationCodeDataGrid.Rows.Add("NOP", "06", "1");
+            operationCodeDataGrid.Rows.Add("CHECK", "06", "1");
         }
 
         private void ExampleComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -315,18 +315,18 @@ namespace lab1SisProg
             Clear();
             if (exampleComboBox.SelectedIndex == 0)
             {
-                sourceCodeTextBox.Text = "prog start 0\r\njmp L1\r\nA1 RESB 10\r\nA2 RESW 20\r\nB1 WORD 4096\r\nB2 BYTE X\"2F4C008A\"\r\nB3 BYTE C\"Hello!\"\r\nB4 BYTE 128\r\nL1 LOADR1 B1\r\nLOADR2 B4\r\nADD R1 R2\r\nSAVER1 L1\r\nNOP\r\nEND 10";
+                sourceCodeTextBox.Text = "prog start 0\r\njmp L1\r\nA1 RESB 10\r\nA2 RESW 20\r\nB1 WORD 4096\r\nB2 BYTE X\"2F4C008A\"\r\nB3 BYTE C\"Hello!\"\r\nB4 BYTE 128\r\nL1 LOADR1 B1\r\nLOADR2 B4\r\nADD R1 R2\r\nSAVER1 L1\r\nCHECK\r\nEND 10";
                 typeAdr = 0;
             }
             if (exampleComboBox.SelectedIndex == 1)
             {
                 typeAdr = 1;
-                sourceCodeTextBox.Text = "prog start 0\r\njmp [L1]\r\nA1 RESB 10\r\nA2 RESW 20\r\nB1 WORD 4096\r\nB2 BYTE X\"2F4C008A\"\r\nB3 BYTE C\"Hello!\"\r\nB4 BYTE 128\r\nL1 LOADR1 [B1]\r\nLOADR2 [B4]\r\nADD R1 R2\r\nSAVER1 [L1]\r\nNOP\r\nEND 10";
+                sourceCodeTextBox.Text = "prog start 0\r\njmp [L1]\r\nA1 RESB 10\r\nA2 RESW 20\r\nB1 WORD 4096\r\nB2 BYTE X\"2F4C008A\"\r\nB3 BYTE C\"Hello!\"\r\nB4 BYTE 128\r\nL1 LOADR1 [B1]\r\nLOADR2 [B4]\r\nADD R1 R2\r\nSAVER1 [L1]\r\nCHECK\r\nEND 10";
             }
             if (exampleComboBox.SelectedIndex == 2)
             {
                 typeAdr = 2;
-                sourceCodeTextBox.Text = "prog start 0\r\njmp [L1]\r\nA1 RESB 10\r\nA2 RESW 20\r\nB1 WORD 4096\r\nB2 BYTE X\"2F4C008A\"\r\nB3 BYTE C\"Hello!\"\r\nB4 BYTE 128\r\nL1 LOADR1 B1\r\nLOADR2 [B4]\r\nADD R1 R2\r\nSAVER1 [L1]\r\nNOP\r\nEND 10";
+                sourceCodeTextBox.Text = "prog start 0\r\njmp [L1]\r\nA1 RESB 10\r\nA2 RESW 20\r\nB1 WORD 4096\r\nB2 BYTE X\"2F4C008A\"\r\nB3 BYTE C\"Hello!\"\r\nB4 BYTE 128\r\nL1 LOADR1 B1\r\nLOADR2 [B4]\r\nADD R1 R2\r\nSAVER1 [L1]\r\nCHECK\r\nEND 10";
             }
         }
     }
